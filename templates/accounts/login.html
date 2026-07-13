@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Ingresar{% endblock %}
+
+{% block content %}
+<div class="flex min-h-[80vh] items-center justify-center">
+  <div class="w-full max-w-sm">
+    <div class="mb-8 text-center">
+      <span class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-white">
+        {% include "icons/_clipboard.html" with class="w-8 h-8" %}
+      </span>
+      <h1 class="text-xl font-semibold text-text">Caminata Gemba</h1>
+      <p class="text-sm text-text-secondary">Logística · Ingresa con tu correo corporativo</p>
+    </div>
+
+    <form method="post" class="card space-y-4">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="rounded-lg border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
+          {{ form.non_field_errors.0 }}
+        </div>
+      {% endif %}
+
+      <div>
+        <label for="{{ form.username.id_for_label }}" class="label">Correo electrónico</label>
+        {{ form.username }}
+      </div>
+
+      <div>
+        <label for="{{ form.password.id_for_label }}" class="label">Contraseña</label>
+        {{ form.password }}
+      </div>
+
+      <button type="submit" class="btn-primary w-full">Ingresar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

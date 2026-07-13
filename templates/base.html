@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-surface">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Caminata Gemba{% endblock %} · Logística</title>
+  <link rel="stylesheet" href="{% static 'css/dist.css' %}">
+  <script defer src="{% static 'js/camera.js' %}"></script>
+  <script defer src="{% static 'vendor/alpine/alpine.min.js' %}"></script>
+  <script src="{% static 'vendor/htmx/htmx.min.js' %}"></script>
+  <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="h-full min-h-screen bg-surface text-text antialiased">
+  {% if user.is_authenticated %}
+  <header class="sticky top-0 z-20 border-b border-border bg-white">
+    <div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+      <a href="{% url 'home' %}" class="flex items-center gap-2 font-semibold text-primary">
+        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white">
+          {% include "icons/_clipboard.html" with class="w-5 h-5" %}
+        </span>
+        <span class="hidden sm:inline">Caminata Gemba</span>
+      </a>
+
+      <nav class="flex items-center gap-1 sm:gap-2">
+        {% if user.is_operador %}
+          <a href="{% url 'gemba:hoy' %}" class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface">
+            {% include "icons/_home.html" with class="w-5 h-5" %}
+            <span class="hidden sm:inline">Hoy</span>
+          </a>
+          <a href="{% url 'gemba:historial' %}" class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface">
+            {% include "icons/_clock.html" with class="w-5 h-5" %}
+            <span class="hidden sm:inline">Historial</span>
+          </a>
+        {% endif %}
+        {% if user.is_jefatura %}
+          <a href="{% url 'gemba:reportes' %}" class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface">
+            {% include "icons/_chart_bar.html" with class="w-5 h-5" %}
+            <span class="hidden sm:inline">Reportes</span>
+          </a>
+        {% endif %}
+
+        <div class="mx-1 hidden h-6 w-px bg-border sm:block"></div>
+
+        <div class="hidden items-center gap-1.5 text-sm text-text-secondary md:flex">
+          {% include "icons/_user_circle.html" with class="w-5 h-5" %}
+          <span>{{ user.get_full_name|default:user.email }}</span>
+          {% if user.area %}<span class="text-secondary">· {{ user.area.name }}</span>{% endif %}
+        </div>
+
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-text-secondary hover:bg-surface hover:text-error" title="Cerrar sesión">
+            {% include "icons/_logout.html" with class="w-5 h-5" %}
+            <span class="hidden sm:inline">Salir</span>
+          </button>
+        </form>
+      </nav>
+    </div>
+  </header>
+  {% endif %}
+
+  <main class="mx-auto max-w-4xl px-4 py-6">
+    {% if messages %}
+      <div class="mb-4 space-y-2">
+        {% for message in messages %}
+          <div class="rounded-lg border px-4 py-3 text-sm {% if message.tags == 'success' %}border-success/30 bg-success/10 text-success{% elif message.tags == 'error' %}border-error/30 bg-error/10 text-error{% else %}border-info/30 bg-info/10 text-info{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Caminata de hoy{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-xl font-semibold text-text">Caminata Gemba · {{ walk.area.name }}</h1>
+  <p class="text-sm text-text-secondary">{{ walk.date|date:"l j \d\e F \d\e Y" }}</p>
+
+  <div class="mt-4 card flex items-center justify-between gap-4">
+    <div>
+      <p class="text-sm font-medium text-text">
+        {% if pending_count == 0 %}
+          Todas las preguntas fueron respondidas.
+        {% else %}
+          {{ pending_count }} pregunta{{ pending_count|pluralize }} pendiente{{ pending_count|pluralize }} de {{ items|length }}.
+        {% endif %}
+      </p>
+      <div class="mt-2 h-2 w-full max-w-xs overflow-hidden rounded-full bg-surface">
+        <div class="h-full rounded-full bg-primary transition-all" style="width: {% widthratio answered_count items|length 100 %}%"></div>
+      </div>
+    </div>
+
+    {% if walk.is_complete %}
+      <span class="badge-success shrink-0">
+        {% include "icons/_check_circle.html" with class="w-4 h-4" %}
+        Caminata completa
+      </span>
+    {% else %}
+      <form method="post" action="{% url 'gemba:finalizar' walk.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-primary" {% if pending_count > 0 %}disabled title="Responde todas las preguntas para finalizar"{% endif %}>
+          Finalizar caminata
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="space-y-4">
+  {% for item in items %}
+    {% include "gemba/partials/_answer_card.html" with question=item.question form=item.form %}
+  {% empty %}
+    <div class="card text-center text-text-secondary">
+      No hay preguntas activas configuradas para esta área todavía.
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

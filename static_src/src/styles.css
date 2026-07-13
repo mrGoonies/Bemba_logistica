@@ -1,0 +1,62 @@
+@import "tailwindcss";
+@source "../../templates";
+@source "../../accounts";
+@source "../../gemba";
+
+@theme {
+  --color-primary: #00694c;
+  --color-primary-dark: #00563e;
+  --color-primary-light: #2f8c6d;
+
+  --color-secondary: #8b8b8b;
+
+  --color-background: #ffffff;
+  --color-surface: #f5f7f6;
+
+  --color-success: #198754;
+  --color-warning: #ffc107;
+  --color-error: #dc3545;
+  --color-info: #0d6efd;
+
+  --color-text: #333333;
+  --color-text-secondary: #666666;
+
+  --color-border: #d9d9d9;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors bg-primary text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors border border-border bg-white text-text hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors bg-error text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .card {
+    @apply rounded-xl border border-border bg-white p-5 shadow-sm;
+  }
+
+  .badge-success {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold bg-success/10 text-success;
+  }
+  .badge-warning {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold bg-warning/20 text-yellow-700;
+  }
+  .badge-error {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold bg-error/10 text-error;
+  }
+  .badge-neutral {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold bg-secondary/10 text-secondary;
+  }
+
+  .input {
+    @apply block w-full rounded-lg border border-border px-3 py-2.5 text-sm text-text placeholder:text-text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20;
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-text;
+  }
+}

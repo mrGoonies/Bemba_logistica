@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Caminata {{ walk.date }}{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h1 class="text-xl font-semibold text-text">{{ walk.area.name }}</h1>
+    <p class="text-sm text-text-secondary">{{ walk.date|date:"l j \d\e F \d\e Y" }}</p>
+  </div>
+  <a href="{% url 'gemba:historial' %}" class="btn-secondary">Volver al historial</a>
+</div>
+
+<div class="space-y-4">
+  {% for item in items %}
+    <div class="card">
+      <div class="mb-2 flex items-start justify-between gap-3">
+        <div>
+          <h3 class="font-medium text-text">{{ item.question.text }}</h3>
+          <p class="mt-1 text-sm text-text-secondary">{{ item.question.criterio }}</p>
+        </div>
+        {% if item.answer %}
+          {% if item.answer.status == "CONFORME" %}
+            <span class="badge-success shrink-0">Conforme</span>
+          {% elif item.answer.status == "PARCIAL" %}
+            <span class="badge-warning shrink-0">Parcial</span>
+          {% else %}
+            <span class="badge-error shrink-0">No conforme</span>
+          {% endif %}
+        {% else %}
+          <span class="badge-neutral shrink-0">Sin responder</span>
+        {% endif %}
+      </div>
+
+      {% if item.answer.comment %}
+        <p class="mb-2 text-sm text-text">{{ item.answer.comment }}</p>
+      {% endif %}
+
+      {% if item.answer.photo %}
+        <img src="{{ item.answer.photo.url }}" alt="Evidencia fotográfica" class="w-full max-w-sm rounded-lg border border-border">
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

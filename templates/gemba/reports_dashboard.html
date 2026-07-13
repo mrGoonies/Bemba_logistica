@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Reportes{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-xl font-semibold text-text">Reporte semanal</h1>
+    <p class="text-sm text-text-secondary">
+      {{ week_start|date:"j \d\e F" }} — {{ week_end|date:"j \d\e F \d\e Y" }}
+      {% if is_current_week %}<span class="badge-neutral ml-1">Semana actual</span>{% endif %}
+    </p>
+  </div>
+  <div class="flex items-center gap-2">
+    <a href="?semana={{ prev_week|date:'Y-m-d' }}" class="btn-secondary" aria-label="Semana anterior">
+      {% include "icons/_chevron_left.html" %}
+    </a>
+    <a href="?semana={{ next_week|date:'Y-m-d' }}" class="btn-secondary" aria-label="Semana siguiente">
+      {% include "icons/_chevron_right.html" %}
+    </a>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+  <div class="card">
+    <div class="flex items-center gap-2 text-error">
+      {% include "icons/_exclamation_triangle.html" with class="w-5 h-5" %}
+      <span class="text-sm font-medium">Incidencias identificadas</span>
+    </div>
+    <p class="mt-2 text-3xl font-semibold text-text">{{ report.identified }}</p>
+    <p class="text-xs text-text-secondary">en la semana seleccionada</p>
+  </div>
+  <div class="card">
+    <div class="flex items-center gap-2 text-success">
+      {% include "icons/_check_circle.html" with class="w-5 h-5" %}
+      <span class="text-sm font-medium">Incidencias solucionadas</span>
+    </div>
+    <p class="mt-2 text-3xl font-semibold text-text">{{ report.resolved }}</p>
+    <p class="text-xs text-text-secondary">en la semana seleccionada</p>
+  </div>
+  <div class="card">
+    <div class="flex items-center gap-2">
+      <span class="text-warning">{% include "icons/_clock.html" with class="w-5 h-5" %}</span>
+      <span class="text-sm font-medium text-yellow-700">Incidencias abiertas</span>
+    </div>
+    <p class="mt-2 text-3xl font-semibold text-text">{{ total_open }}</p>
+    <p class="text-xs text-text-secondary">a la fecha, en todas las áreas</p>
+  </div>
+</div>
+
+<div class="card mt-4">
+  <h2 class="mb-4 font-medium text-text">Identificadas vs. solucionadas por área</h2>
+
+  {% if report.breakdown %}
+    <div class="space-y-4">
+      {% for b in report.breakdown %}
+        <div>
+          <p class="mb-1 text-sm font-medium text-text">{{ b.area.name }}</p>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="w-24 shrink-0 text-xs text-text-secondary">Identificadas</span>
+              <div class="h-4 flex-1 overflow-hidden rounded bg-surface">
+                <div class="h-full rounded bg-error" style="width: {% widthratio b.identified max_bar_value 100 %}%"></div>
+              </div>
+              <span class="w-6 shrink-0 text-right text-sm font-medium text-text">{{ b.identified }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-24 shrink-0 text-xs text-text-secondary">Solucionadas</span>
+              <div class="h-4 flex-1 overflow-hidden rounded bg-surface">
+                <div class="h-full rounded bg-success" style="width: {% widthratio b.resolved max_bar_value 100 %}%"></div>
+              </div>
+              <span class="w-6 shrink-0 text-right text-sm font-medium text-text">{{ b.resolved }}</span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-sm text-text-secondary">No hay preguntas configuradas todavía.</p>
+  {% endif %}
+</div>
+
+<div class="card mt-4">
+  <h2 class="mb-4 font-medium text-text">Incidencias abiertas actualmente</h2>
+
+  {% if report.open_incidents %}
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-border text-text-secondary">
+            <th class="pb-2 pr-3 font-medium">Área</th>
+            <th class="pb-2 pr-3 font-medium">Pregunta</th>
+            <th class="pb-2 pr-3 font-medium">Estado</th>
+            <th class="pb-2 pr-3 font-medium">Desde</th>
+            <th class="pb-2 font-medium">Días abierta</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for incident in report.open_incidents %}
+            <tr class="border-b border-border last:border-0">
+              <td class="py-2 pr-3 text-text">{{ incident.area.name }}</td>
+              <td class="py-2 pr-3 text-text">{{ incident.question.text }}</td>
+              <td class="py-2 pr-3">
+                {% if incident.status == "NO_CONFORME" %}
+                  <span class="badge-error">No conforme</span>
+                {% else %}
+                  <span class="badge-warning">Parcial</span>
+                {% endif %}
+              </td>
+              <td class="py-2 pr-3 text-text-secondary">{{ incident.since|date:"d-m-Y" }}</td>
+              <td class="py-2 font-medium text-text">{{ incident.days_open }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-sm text-text-secondary">No hay incidencias abiertas. Buen trabajo.</p>
+  {% endif %}
+</div>
+{% endblock %}

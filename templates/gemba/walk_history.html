@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Historial de caminatas{% endblock %}
+
+{% block content %}
+<h1 class="mb-6 text-xl font-semibold text-text">Historial · {{ user.area.name }}</h1>
+
+<div class="space-y-3">
+  {% for walk in walks %}
+    <a href="{% url 'gemba:detalle' walk.id %}" class="card flex items-center justify-between gap-4 hover:border-primary">
+      <div>
+        <p class="font-medium text-text">{{ walk.date|date:"j \d\e F \d\e Y" }}</p>
+        <p class="text-sm text-text-secondary">{{ walk.answers.count }} respuesta{{ walk.answers.count|pluralize }} registrada{{ walk.answers.count|pluralize }}</p>
+      </div>
+      {% if walk.is_complete %}
+        <span class="badge-success">
+          {% include "icons/_check_circle.html" with class="w-4 h-4" %}
+          Completa
+        </span>
+      {% else %}
+        <span class="badge-warning">
+          {% include "icons/_exclamation_triangle.html" with class="w-4 h-4" %}
+          En progreso
+        </span>
+      {% endif %}
+    </a>
+  {% empty %}
+    <div class="card text-center text-text-secondary">Aún no hay caminatas registradas.</div>
+  {% endfor %}
+</div>
+
+{% if is_paginated %}
+  <div class="mt-6 flex justify-center gap-2">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" class="btn-secondary">{% include "icons/_chevron_left.html" %}</a>
+    {% endif %}
+    <span class="flex items-center px-3 text-sm text-text-secondary">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" class="btn-secondary">{% include "icons/_chevron_right.html" %}</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}
