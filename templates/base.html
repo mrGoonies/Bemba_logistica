@@ -38,6 +38,10 @@
             {% include "icons/_chart_bar.html" with class="w-5 h-5" %}
             <span class="hidden sm:inline">Reportes</span>
           </a>
+          <a href="{% url 'gemba:preguntas' %}" class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-text hover:bg-surface">
+            {% include "icons/_list_bullet.html" with class="w-5 h-5" %}
+            <span class="hidden sm:inline">Preguntas</span>
+          </a>
         {% endif %}
 
         <div class="mx-1 hidden h-6 w-px bg-border sm:block"></div>

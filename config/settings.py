@@ -120,7 +120,15 @@ STORAGES = {
         ),
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # El manifest hasheado (para cache-busting) requiere haber corrido
+        # collectstatic antes; solo se usa en Render. Localmente y en tests
+        # (donde el test runner fuerza DEBUG=False, así que no podemos usar
+        # DEBUG como señal) cae al storage simple, sin manifest.
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if RENDER_EXTERNAL_HOSTNAME
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
     },
 }
 

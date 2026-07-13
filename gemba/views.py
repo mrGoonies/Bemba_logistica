@@ -3,13 +3,15 @@ from datetime import date, timedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView
 
-from .forms import AnswerForm
+from .forms import AnswerForm, QuestionForm
 from .mixins import OperatorRequiredMixin, SupervisorRequiredMixin
-from .models import Answer, Walk
+from .models import Answer, Area, Question, Walk
 from .reports import compute_report, week_bounds
 
 
@@ -119,6 +121,66 @@ class WalkDetailView(OperatorRequiredMixin, DetailView):
             for question in self.object.active_questions().order_by("order")
         ]
         return context
+
+
+class QuestionListView(SupervisorRequiredMixin, ListView):
+    template_name = "gemba/questions_list.html"
+    context_object_name = "areas"
+
+    def get_queryset(self):
+        return Area.objects.prefetch_related("questions").all()
+
+
+class QuestionCreateView(SupervisorRequiredMixin, CreateView):
+    model = Question
+    form_class = QuestionForm
+    template_name = "gemba/question_form.html"
+    success_url = reverse_lazy("gemba:preguntas")
+
+    def get_initial(self):
+        initial = super().get_initial()
+        area_id = self.request.GET.get("area")
+        if area_id:
+            initial["area"] = area_id
+        return initial
+
+
+class QuestionUpdateView(SupervisorRequiredMixin, UpdateView):
+    model = Question
+    form_class = QuestionForm
+    template_name = "gemba/question_form.html"
+    success_url = reverse_lazy("gemba:preguntas")
+
+
+@login_required
+def question_delete(request, pk):
+    if not request.user.is_jefatura:
+        raise PermissionDenied
+    question = get_object_or_404(Question, pk=pk)
+    if request.method == "POST":
+        try:
+            question.delete()
+            messages.success(request, "Pregunta eliminada definitivamente.")
+        except ProtectedError:
+            question.is_active = False
+            question.save(update_fields=["is_active"])
+            messages.success(
+                request,
+                "La pregunta tiene respuestas históricas, así que se desactivó en lugar de eliminarse.",
+            )
+    return redirect("gemba:preguntas")
+
+
+@login_required
+def question_reactivate(request, pk):
+    if not request.user.is_jefatura:
+        raise PermissionDenied
+    question = get_object_or_404(Question, pk=pk)
+    if request.method == "POST":
+        question.is_active = True
+        question.save(update_fields=["is_active"])
+        messages.success(request, "Pregunta reactivada.")
+    return redirect("gemba:preguntas")
 
 
 class ReportDashboardView(SupervisorRequiredMixin, TemplateView):

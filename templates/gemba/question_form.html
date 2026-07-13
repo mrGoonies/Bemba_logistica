@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Editar pregunta{% else %}Nueva pregunta{% endif %}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-lg">
+  <h1 class="mb-6 text-xl font-semibold text-text">
+    {% if object %}Editar pregunta{% else %}Nueva pregunta{% endif %}
+  </h1>
+
+  <form method="post" class="card space-y-4">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="rounded-lg border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
+        {{ form.non_field_errors.0 }}
+      </div>
+    {% endif %}
+
+    <div>
+      <label for="{{ form.area.id_for_label }}" class="label">Área</label>
+      {{ form.area }}
+      {% if form.area.errors %}<p class="mt-1 text-sm text-error">{{ form.area.errors.0 }}</p>{% endif %}
+    </div>
+
+    <div>
+      <label for="{{ form.text.id_for_label }}" class="label">Pregunta</label>
+      {{ form.text }}
+      {% if form.text.errors %}<p class="mt-1 text-sm text-error">{{ form.text.errors.0 }}</p>{% endif %}
+    </div>
+
+    <div>
+      <label for="{{ form.criterio.id_for_label }}" class="label">Criterio</label>
+      {{ form.criterio }}
+      <p class="mt-1 text-xs text-text-secondary">Contexto que ve el operador al responder.</p>
+      {% if form.criterio.errors %}<p class="mt-1 text-sm text-error">{{ form.criterio.errors.0 }}</p>{% endif %}
+    </div>
+
+    <div>
+      <label for="{{ form.order.id_for_label }}" class="label">Orden</label>
+      {{ form.order }}
+      {% if form.order.errors %}<p class="mt-1 text-sm text-error">{{ form.order.errors.0 }}</p>{% endif %}
+    </div>
+
+    <div class="flex items-center gap-2 pt-2">
+      <button type="submit" class="btn-primary">Guardar</button>
+      <a href="{% url 'gemba:preguntas' %}" class="btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

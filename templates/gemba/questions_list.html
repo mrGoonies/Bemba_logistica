@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Preguntas{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-xl font-semibold text-text">Preguntas de la caminata</h1>
+    <p class="text-sm text-text-secondary">Configurá el checklist que responde cada área.</p>
+  </div>
+  <a href="{% url 'gemba:pregunta_nueva' %}" class="btn-primary">
+    {% include "icons/_plus.html" with class="w-5 h-5" %}
+    Nueva pregunta
+  </a>
+</div>
+
+<div class="space-y-4">
+  {% for area in areas %}
+    <div class="card">
+      <h2 class="mb-4 font-medium text-text">{{ area.name }}</h2>
+
+      {% with questions=area.questions.all %}
+        {% if questions %}
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead>
+                <tr class="border-b border-border text-text-secondary">
+                  <th class="pb-2 pr-3 font-medium">Orden</th>
+                  <th class="pb-2 pr-3 font-medium">Pregunta</th>
+                  <th class="pb-2 pr-3 font-medium">Estado</th>
+                  <th class="pb-2 font-medium text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for question in questions %}
+                  <tr class="border-b border-border last:border-0">
+                    <td class="py-2 pr-3 text-text-secondary">{{ question.order }}</td>
+                    <td class="py-2 pr-3 text-text">
+                      {{ question.text }}
+                      <p class="text-xs text-text-secondary">{{ question.criterio|truncatechars:100 }}</p>
+                    </td>
+                    <td class="py-2 pr-3">
+                      {% if question.is_active %}
+                        <span class="badge-success">Activa</span>
+                      {% else %}
+                        <span class="badge-neutral">Inactiva</span>
+                      {% endif %}
+                    </td>
+                    <td class="py-2">
+                      <div class="flex items-center justify-end gap-1">
+                        <a href="{% url 'gemba:pregunta_editar' question.id %}" class="btn-secondary !px-2 !py-1.5" aria-label="Editar">
+                          {% include "icons/_pencil.html" with class="w-4 h-4" %}
+                        </a>
+                        {% if question.is_active %}
+                          <form method="post" action="{% url 'gemba:pregunta_eliminar' question.id %}" onsubmit="return confirm('¿Eliminar esta pregunta?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-secondary !px-2 !py-1.5 hover:!text-error" aria-label="Eliminar">
+                              {% include "icons/_trash.html" with class="w-4 h-4" %}
+                            </button>
+                          </form>
+                        {% else %}
+                          <form method="post" action="{% url 'gemba:pregunta_reactivar' question.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-secondary !px-2 !py-1.5">Reactivar</button>
+                          </form>
+                        {% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-sm text-text-secondary">Todavía no hay preguntas para esta área.</p>
+        {% endif %}
+      {% endwith %}
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
