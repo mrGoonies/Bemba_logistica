@@ -4,6 +4,7 @@ document.addEventListener('alpine:init', () => {
     hasSavedPhoto: Boolean(hasSavedPhoto),
     stream: null,
     cameraActive: false,
+    videoReady: false,
     capturedPreviewUrl: null,
 
     get needsPhoto() {
@@ -31,9 +32,15 @@ document.addEventListener('alpine:init', () => {
           video: { facingMode: 'environment' },
           audio: false,
         });
+        this.videoReady = false;
         this.cameraActive = true;
         this.$nextTick(() => {
-          this.$refs.video.srcObject = this.stream;
+          const video = this.$refs.video;
+          video.srcObject = this.stream;
+          video.onloadedmetadata = () => {
+            video.play().catch(() => {});
+            this.videoReady = true;
+          };
         });
       } catch (err) {
         alert('No se pudo acceder a la cámara. Verifica los permisos del navegador.');
@@ -46,16 +53,25 @@ document.addEventListener('alpine:init', () => {
         this.stream = null;
       }
       this.cameraActive = false;
+      this.videoReady = false;
     },
 
     capture() {
       const video = this.$refs.video;
+      if (!this.videoReady || !video.videoWidth || !video.videoHeight) {
+        alert('La cámara todavía se está iniciando, espera un segundo e intenta de nuevo.');
+        return;
+      }
       const canvas = this.$refs.canvas;
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext('2d').drawImage(video, 0, 0);
       canvas.toBlob(
         (blob) => {
+          if (!blob) {
+            alert('No se pudo capturar la fotografía. Intenta nuevamente.');
+            return;
+          }
           const file = new File([blob], `foto_${Date.now()}.jpg`, { type: 'image/jpeg' });
           const dataTransfer = new DataTransfer();
           dataTransfer.items.add(file);

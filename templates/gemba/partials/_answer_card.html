@@ -62,8 +62,9 @@
 
       <div x-show="cameraActive" x-cloak class="space-y-2">
         <video x-ref="video" autoplay playsinline muted class="w-full rounded-lg border border-border bg-black"></video>
+        <p x-show="!videoReady" x-cloak class="text-sm text-text-secondary">Iniciando cámara…</p>
         <div class="flex gap-2">
-          <button type="button" class="btn-primary" @click="capture()">
+          <button type="button" class="btn-primary" @click="capture()" :disabled="!videoReady">
             {% include "icons/_camera.html" %}
             Capturar
           </button>
